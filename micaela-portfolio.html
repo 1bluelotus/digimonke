@@ -198,6 +198,30 @@ html, body {
   opacity: 0.28;
 }
 
+/* ── Nav ── */
+#nav {
+  position: absolute;
+  top: 90px; left: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+#nav a {
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+  padding: 2px 0;
+}
+#nav a:hover {
+  opacity: 0.85;
+}
+
 #hint {
   position: absolute;
   bottom: 28px; left: 50%;
@@ -228,6 +252,13 @@ html, body {
 <div id="ui">
   <div id="site-name">Micaela</div>
   <div id="site-tagline">Digital Works</div>
+  <nav id="nav">
+    <a href="#about">About</a>
+    <a href="#archive">Archive</a>
+    <a href="#commission">Commission</a>
+    <a href="#contact">Contact</a>
+    <a href="#socials">Socials</a>
+  </nav>
   <div id="hint">Hover to explore &nbsp;·&nbsp; Click to lock &nbsp;·&nbsp; Esc to release</div>
 </div>
 
