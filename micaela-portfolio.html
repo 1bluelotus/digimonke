@@ -427,35 +427,6 @@ class Bubble {
     if (activeBubble === this) activeBubble = null;
   }
 
-  /* Called each frame for non-active bubbles: spring pushX/pushY toward target */
-  applyRepulsion(ax, ay, aw, ah) {
-    const margin = 30;
-    const halfW = aw / 2 + THUMB_R + margin;
-    const halfH = ah / 2 + THUMB_R + margin;
-
-    const dx = this.cx - ax;
-    const dy = this.cy - ay;
-
-    const overlapX = halfW - Math.abs(dx);
-    const overlapY = halfH - Math.abs(dy);
-
-    if (overlapX > 0 && overlapY > 0) {
-      // Inside the repulsion zone — push along shorter overlap axis, but
-      // bias toward the direction from active center to this center.
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const nx   = dx / dist;
-      const ny   = dy / dist;
-
-      // Push strength = how deep inside the zone we are
-      const strength = Math.min(overlapX, overlapY) * 0.85;
-      this.pushX += (nx * strength - this.pushX) * 0.14;
-      this.pushY += (ny * strength - this.pushY) * 0.14;
-    } else {
-      this.pushX += (0 - this.pushX) * 0.10;
-      this.pushY += (0 - this.pushY) * 0.10;
-    }
-  }
-
   /* Update drift position */
   updateDrift(t) {
     if (this.locked) return; // locked bubbles stay put
@@ -508,30 +479,65 @@ function tick(t) {
 
   bubbles.forEach(b => {
     if (b === ab) {
-      // Active bubble: no drift if locked
       if (!b.locked) {
         b.cx = b.baseCx + Math.sin(t * b.speedX + b.phaseX) * b.ampX;
         b.cy = b.baseCy + Math.sin(t * b.speedY + b.phaseY) * b.ampY;
       }
-      // Spring push back to 0 for active bubble itself
       b.pushX += (0 - b.pushX) * 0.1;
       b.pushY += (0 - b.pushY) * 0.1;
     } else {
       b.updateDrift(t);
       if (ab) {
-        b.applyRepulsion(
-          ab.cx + ab.pushX, ab.cy + ab.pushY,
-          ab.expW, ab.expH
-        );
+        // AABB repulsion from the expanded active bubble
+        const margin = 30;
+        const halfW = ab.expW / 2 + THUMB_R + margin;
+        const halfH = ab.expH / 2 + THUMB_R + margin;
+        const dx = (b.cx + b.pushX) - (ab.cx + ab.pushX);
+        const dy = (b.cy + b.pushY) - (ab.cy + ab.pushY);
+        const overlapX = halfW - Math.abs(dx);
+        const overlapY = halfH - Math.abs(dy);
+        if (overlapX > 0 && overlapY > 0) {
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const nx = dx / dist;
+          const ny = dy / dist;
+          const strength = Math.min(overlapX, overlapY) * 0.85;
+          b.pushX += (nx * strength - b.pushX) * 0.14;
+          b.pushY += (ny * strength - b.pushY) * 0.14;
+        } else {
+          b.pushX += (0 - b.pushX) * 0.10;
+          b.pushY += (0 - b.pushY) * 0.10;
+        }
       } else {
-        // Spring back to 0 push
         b.pushX += (0 - b.pushX) * 0.09;
         b.pushY += (0 - b.pushY) * 0.09;
       }
     }
-    b.render();
   });
 
+  // Collapsed-to-collapsed pairwise collision
+  const colMin = THUMB_R * 2 + SPREAD_MARGIN;
+  for (let i = 0; i < bubbles.length; i++) {
+    const a = bubbles[i];
+    if (a === ab || a.hovered || a.locked) continue;
+    for (let j = i + 1; j < bubbles.length; j++) {
+      const b = bubbles[j];
+      if (b === ab || b.hovered || b.locked) continue;
+      const dx = (b.cx + b.pushX) - (a.cx + a.pushX);
+      const dy = (b.cy + b.pushY) - (a.cy + a.pushY);
+      const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+      if (dist < colMin) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const push = (colMin - dist) * 0.3;
+        a.pushX -= nx * push * 0.5;
+        a.pushY -= ny * push * 0.5;
+        b.pushX += nx * push * 0.5;
+        b.pushY += ny * push * 0.5;
+      }
+    }
+  }
+
+  bubbles.forEach(b => b.render());
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
