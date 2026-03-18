@@ -330,8 +330,9 @@ class Bubble {
     this.pushY = 0;
 
     // State flags
-    this.hovered = false;
-    this.locked  = false;
+    this.hovered     = false;
+    this.locked      = false;
+    this.expandReady = false;
 
     this._build();
   }
@@ -370,6 +371,11 @@ class Bubble {
     bub.addEventListener('mouseenter', () => this._onEnter());
     bub.addEventListener('mouseleave', () => this._onLeave());
     bub.addEventListener('click',      () => this._onClick());
+    bub.addEventListener('transitionend', e => {
+      if (e.propertyName === 'width' && this.hovered && !this.locked) {
+        this.expandReady = true;
+      }
+    });
 
     document.getElementById('canvas').appendChild(anchor);
   }
@@ -390,6 +396,7 @@ class Bubble {
   _onLeave() {
     if (this.locked) return;
     this.hovered = false;
+    this.expandReady = false;
     if (activeBubble === this) activeBubble = null;
     this.anchorEl.classList.remove('active');
     this.bubbleEl.classList.remove('expanded');
@@ -401,14 +408,15 @@ class Bubble {
     if (this.locked) {
       // Unlock
       this.locked = false;
+      this.expandReady = false;
       this.hovered = false;
       activeBubble = null;
       this.anchorEl.classList.remove('active', 'locked');
       this.bubbleEl.classList.remove('expanded', 'locked');
       this.bubbleEl.style.width  = THUMB_R * 2 + 'px';
       this.bubbleEl.style.height = THUMB_R * 2 + 'px';
-    } else {
-      // Lock
+    } else if (this.expandReady) {
+      // Lock — only when fully expanded
       this.locked = true;
       activeBubble = this;
       this.anchorEl.classList.add('active', 'locked');
@@ -419,6 +427,7 @@ class Bubble {
   unlock() {
     if (!this.locked) return;
     this.locked = false;
+    this.expandReady = false;
     this.hovered = false;
     this.anchorEl.classList.remove('active', 'locked');
     this.bubbleEl.classList.remove('expanded', 'locked');
