@@ -325,9 +325,12 @@ class Bubble {
     this.ampX      = 14 + Math.random() * 22;
     this.ampY      = 11 + Math.random() * 18;
 
-    // Push offset (spring)
+    // Push offset (spring — for expanded-bubble repulsion)
     this.pushX = 0;
     this.pushY = 0;
+    // Collision offset (hard constraint — recomputed each frame)
+    this.collOffX = 0;
+    this.collOffY = 0;
 
     // State flags
     this.hovered     = false;
@@ -445,8 +448,8 @@ class Bubble {
 
   /* Commit position to DOM */
   render() {
-    const x = this.cx + this.pushX;
-    const y = this.cy + this.pushY;
+    const x = this.cx + this.pushX + this.collOffX;
+    const y = this.cy + this.pushY + this.collOffY;
     this.anchorEl.style.transform = `translate(${x}px, ${y}px)`;
   }
 }
@@ -454,23 +457,54 @@ class Bubble {
 /* ── Build all bubbles ── */
 const bubbles = PIECES.map(p => new Bubble(p));
 
-/* ── Spread bubbles so they don't start overlapping ── */
-(function spread() {
-  const MIN_D = THUMB_R * 2 + SPREAD_MARGIN;
-  for (let iter = 0; iter < 80; iter++) {
-    for (let i = 0; i < bubbles.length; i++) {
-      for (let j = i + 1; j < bubbles.length; j++) {
+/* ── Place bubbles on a jittered grid, then refine with relaxation ── */
+(function placeAndSpread() {
+  const padX = THUMB_R + 40, padY = THUMB_R + 70;
+  const usableW = window.innerWidth - padX * 2;
+  const usableH = window.innerHeight - padY * 2;
+  const n = bubbles.length;
+  const cols = Math.ceil(Math.sqrt(n * (usableW / usableH)));
+  const rows = Math.ceil(n / cols);
+  const cellW = usableW / cols;
+  const cellH = usableH / rows;
+
+  const order = Array.from({length: n}, (_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  bubbles.forEach((b, idx) => {
+    const cell = order[idx];
+    const col = cell % cols;
+    const row = Math.floor(cell / cols);
+    const jitterX = (Math.random() - 0.5) * Math.max(0, cellW - THUMB_R * 2);
+    const jitterY = (Math.random() - 0.5) * Math.max(0, cellH - THUMB_R * 2);
+    b.baseCx = clamp(padX + cellW * (col + 0.5) + jitterX, padX, window.innerWidth  - padX);
+    b.baseCy = clamp(padY + cellH * (row + 0.5) + jitterY, padY, window.innerHeight - padY);
+    b.cx = b.baseCx;
+    b.cy = b.baseCy;
+  });
+
+  // Account for max drift amplitude so bases are far enough apart
+  // that sinusoidal drift rarely brings bubbles into collision range
+  const maxDrift = 36 + 29; // max ampX + max ampY
+  const MIN_D = THUMB_R * 2 + SPREAD_MARGIN + maxDrift;
+  for (let iter = 0; iter < 200; iter++) {
+    let settled = true;
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
         const a = bubbles[i], b = bubbles[j];
         const dx = b.baseCx - a.baseCx;
         const dy = b.baseCy - a.baseCy;
         const d  = Math.sqrt(dx * dx + dy * dy) || 0.001;
         if (d < MIN_D) {
+          settled = false;
           const push = (MIN_D - d) / 2;
           const nx = dx / d, ny = dy / d;
           a.baseCx -= nx * push; a.baseCy -= ny * push;
           b.baseCx += nx * push; b.baseCy += ny * push;
-          const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-          const padX = THUMB_R + 40, padY = THUMB_R + 70;
           a.baseCx = clamp(a.baseCx, padX, window.innerWidth  - padX);
           a.baseCy = clamp(a.baseCy, padY, window.innerHeight - padY);
           b.baseCx = clamp(b.baseCx, padX, window.innerWidth  - padX);
@@ -478,9 +512,15 @@ const bubbles = PIECES.map(p => new Bubble(p));
         }
       }
     }
+    if (settled) break;
   }
   bubbles.forEach(b => { b.cx = b.baseCx; b.cy = b.baseCy; });
+  bubbles.forEach(b => b.render());
 })();
+
+/* ── Viewport boundary constants ── */
+const EDGE_PAD_X = THUMB_R + 6;
+const EDGE_PAD_Y = THUMB_R + 6;
 
 /* ── Animation loop ── */
 function tick(t) {
@@ -523,28 +563,48 @@ function tick(t) {
     }
   });
 
-  // Collapsed-to-collapsed pairwise collision
+  // Hard constraint: collapsed-to-collapsed separation (position-based)
+  // Reset collision offsets — recomputed from scratch each frame
+  bubbles.forEach(b => { b.collOffX = 0; b.collOffY = 0; });
+
   const colMin = THUMB_R * 2 + SPREAD_MARGIN;
-  for (let i = 0; i < bubbles.length; i++) {
-    const a = bubbles[i];
-    if (a === ab || a.hovered || a.locked) continue;
-    for (let j = i + 1; j < bubbles.length; j++) {
-      const b = bubbles[j];
-      if (b === ab || b.hovered || b.locked) continue;
-      const dx = (b.cx + b.pushX) - (a.cx + a.pushX);
-      const dy = (b.cy + b.pushY) - (a.cy + a.pushY);
-      const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
-      if (dist < colMin) {
-        const nx = dx / dist;
-        const ny = dy / dist;
-        const push = (colMin - dist) * 0.3;
-        a.pushX -= nx * push * 0.5;
-        a.pushY -= ny * push * 0.5;
-        b.pushX += nx * push * 0.5;
-        b.pushY += ny * push * 0.5;
+  for (let iter = 0; iter < 5; iter++) {
+    for (let i = 0; i < bubbles.length; i++) {
+      const a = bubbles[i];
+      if (a.hovered || a.locked) continue;
+      for (let j = i + 1; j < bubbles.length; j++) {
+        const b = bubbles[j];
+        if (b.hovered || b.locked) continue;
+        const ax = a.cx + a.pushX + a.collOffX;
+        const ay = a.cy + a.pushY + a.collOffY;
+        const bx = b.cx + b.pushX + b.collOffX;
+        const by = b.cy + b.pushY + b.collOffY;
+        const dx = bx - ax;
+        const dy = by - ay;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+        if (dist < colMin) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+          const correction = (colMin - dist) / 2;
+          a.collOffX -= nx * correction;
+          a.collOffY -= ny * correction;
+          b.collOffX += nx * correction;
+          b.collOffY += ny * correction;
+        }
       }
     }
   }
+
+  // Enforce viewport boundaries on final rendered position
+  const vw = window.innerWidth, vh = window.innerHeight;
+  bubbles.forEach(b => {
+    let x = b.cx + b.pushX + b.collOffX;
+    let y = b.cy + b.pushY + b.collOffY;
+    if (x < EDGE_PAD_X)      b.collOffX += EDGE_PAD_X - x;
+    if (x > vw - EDGE_PAD_X) b.collOffX += (vw - EDGE_PAD_X) - x;
+    if (y < EDGE_PAD_Y)      b.collOffY += EDGE_PAD_Y - y;
+    if (y > vh - EDGE_PAD_Y) b.collOffY += (vh - EDGE_PAD_Y) - y;
+  });
 
   bubbles.forEach(b => b.render());
   requestAnimationFrame(tick);
