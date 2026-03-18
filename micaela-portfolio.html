@@ -281,6 +281,11 @@ const PIECES = [
     gradient: 'radial-gradient(ellipse at 45% 40%, #f0b0c8 0%, #c83870 40%, #580828 80%, #120208 100%)',
     ar: { w: 1, h: 1.4 },
   },
+  {
+    label: 'Stillness',
+    gradient: 'radial-gradient(ellipse at 50% 50%, #b0c8d8 0%, #4a6878 40%, #1a2830 75%, #080e12 100%)',
+    ar: { w: 3, h: 2 },
+  },
 ];
 
 /* ── Constants ── */
@@ -322,8 +327,8 @@ class Bubble {
     this.phaseY    = Math.random() * Math.PI * 2;
     this.speedX    = 0.00025 + Math.random() * 0.00025;
     this.speedY    = this.speedX * (0.6 + Math.random() * 0.5);
-    this.ampX      = 14 + Math.random() * 22;
-    this.ampY      = 11 + Math.random() * 18;
+    this.ampX      = 4 + Math.random() * 6;
+    this.ampY      = 3 + Math.random() * 5;
 
     // Push offset (spring — for expanded-bubble repulsion)
     this.pushX = 0;
@@ -457,66 +462,29 @@ class Bubble {
 /* ── Build all bubbles ── */
 const bubbles = PIECES.map(p => new Bubble(p));
 
-/* ── Place bubbles on a jittered grid, then refine with relaxation ── */
-(function placeAndSpread() {
-  const padX = THUMB_R + 40, padY = THUMB_R + 70;
-  const usableW = window.innerWidth - padX * 2;
-  const usableH = window.innerHeight - padY * 2;
-  const n = bubbles.length;
-  const cols = Math.ceil(Math.sqrt(n * (usableW / usableH)));
-  const rows = Math.ceil(n / cols);
-  const cellW = usableW / cols;
-  const cellH = usableH / rows;
+/* ── Hex grid placement (centered in viewport) ── */
+const HEX_H_SPACING = 170;
+const HEX_V_SPACING = 148;
+const HEX_ROWS = [3, 4, 3];
 
-  const order = Array.from({length: n}, (_, i) => i);
-  for (let i = order.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  bubbles.forEach((b, idx) => {
-    const cell = order[idx];
-    const col = cell % cols;
-    const row = Math.floor(cell / cols);
-    const jitterX = (Math.random() - 0.5) * Math.max(0, cellW - THUMB_R * 2);
-    const jitterY = (Math.random() - 0.5) * Math.max(0, cellH - THUMB_R * 2);
-    b.baseCx = clamp(padX + cellW * (col + 0.5) + jitterX, padX, window.innerWidth  - padX);
-    b.baseCy = clamp(padY + cellH * (row + 0.5) + jitterY, padY, window.innerHeight - padY);
-    b.cx = b.baseCx;
-    b.cy = b.baseCy;
-  });
-
-  // Account for max drift amplitude so bases are far enough apart
-  // that sinusoidal drift rarely brings bubbles into collision range
-  const maxDrift = 36 + 29; // max ampX + max ampY
-  const MIN_D = THUMB_R * 2 + SPREAD_MARGIN + maxDrift;
-  for (let iter = 0; iter < 200; iter++) {
-    let settled = true;
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        const a = bubbles[i], b = bubbles[j];
-        const dx = b.baseCx - a.baseCx;
-        const dy = b.baseCy - a.baseCy;
-        const d  = Math.sqrt(dx * dx + dy * dy) || 0.001;
-        if (d < MIN_D) {
-          settled = false;
-          const push = (MIN_D - d) / 2;
-          const nx = dx / d, ny = dy / d;
-          a.baseCx -= nx * push; a.baseCy -= ny * push;
-          b.baseCx += nx * push; b.baseCy += ny * push;
-          a.baseCx = clamp(a.baseCx, padX, window.innerWidth  - padX);
-          a.baseCy = clamp(a.baseCy, padY, window.innerHeight - padY);
-          b.baseCx = clamp(b.baseCx, padX, window.innerWidth  - padX);
-          b.baseCy = clamp(b.baseCy, padY, window.innerHeight - padY);
-        }
-      }
+function layoutHexGrid() {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const totalRows = HEX_ROWS.length;
+  let idx = 0;
+  for (let r = 0; r < totalRows; r++) {
+    const count = HEX_ROWS[r];
+    for (let c = 0; c < count; c++) {
+      const b = bubbles[idx++];
+      b.baseCx = cx + (c - (count - 1) / 2) * HEX_H_SPACING;
+      b.baseCy = cy + (r - (totalRows - 1) / 2) * HEX_V_SPACING;
+      b.cx = b.baseCx;
+      b.cy = b.baseCy;
     }
-    if (settled) break;
   }
-  bubbles.forEach(b => { b.cx = b.baseCx; b.cy = b.baseCy; });
-  bubbles.forEach(b => b.render());
-})();
+}
+layoutHexGrid();
+bubbles.forEach(b => b.render());
 
 /* ── Viewport boundary constants ── */
 const EDGE_PAD_X = THUMB_R + 6;
@@ -618,12 +586,7 @@ document.addEventListener('keydown', e => {
 
 /* ── Resize handling ── */
 window.addEventListener('resize', () => {
-  // Re-clamp base positions to new viewport
-  bubbles.forEach(b => {
-    const padX = THUMB_R + 40, padY = THUMB_R + 70;
-    b.baseCx = Math.max(padX, Math.min(window.innerWidth  - padX, b.baseCx));
-    b.baseCy = Math.max(padY, Math.min(window.innerHeight - padY, b.baseCy));
-  });
+  layoutHexGrid();
 });
 </script>
 </body>
