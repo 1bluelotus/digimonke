@@ -1,59 +1,5 @@
 'use strict';
 
-/* ── Piece data ── */
-const PIECES = window.GALLERY_PIECES || [
-  {
-    label: 'Reverie I',
-    gradient: 'radial-gradient(ellipse at 30% 40%, #c45c3a 0%, #7a1c10 55%, #1a0808 100%)',
-    ar: { w: 1, h: 1 },
-  },
-  {
-    label: 'Coastal Memory',
-    gradient: 'linear-gradient(170deg, #0a1528 0%, #1a4a8b 40%, #3a80c0 70%, #88c8e8 100%)',
-    ar: { w: 16, h: 9 },
-  },
-  {
-    label: 'Figure Study',
-    gradient: 'linear-gradient(180deg, #0e1a0e 0%, #2a6a30 45%, #60b060 78%, #a8d890 100%)',
-    ar: { w: 2, h: 3 },
-  },
-  {
-    label: 'Ether',
-    gradient: 'radial-gradient(ellipse at 60% 35%, #d480d4 0%, #7a28a0 45%, #280845 100%)',
-    ar: { w: 4, h: 3 },
-  },
-  {
-    label: 'Threshold',
-    gradient: 'linear-gradient(210deg, #f0d070 0%, #c09020 40%, #5c3a08 75%, #180e00 100%)',
-    ar: { w: 3, h: 4 },
-  },
-  {
-    label: 'Horizon Line',
-    gradient: 'linear-gradient(180deg, #06141e 0%, #0e4060 35%, #1a8090 60%, #70d8d8 100%)',
-    ar: { w: 21, h: 9 },
-  },
-  {
-    label: 'Warmth',
-    gradient: 'radial-gradient(ellipse at 40% 55%, #f0a060 0%, #c04020 45%, #400808 100%)',
-    ar: { w: 3, h: 2 },
-  },
-  {
-    label: 'Ascent',
-    gradient: 'linear-gradient(175deg, #0a061e 0%, #4a28b0 50%, #9070f0 80%, #d0b8ff 100%)',
-    ar: { w: 5, h: 7 },
-  },
-  {
-    label: 'Blush Study',
-    gradient: 'radial-gradient(ellipse at 45% 40%, #f0b0c8 0%, #c83870 40%, #580828 80%, #120208 100%)',
-    ar: { w: 1, h: 1.4 },
-  },
-  {
-    label: 'Stillness',
-    gradient: 'radial-gradient(ellipse at 50% 50%, #b0c8d8 0%, #4a6878 40%, #1a2830 75%, #080e12 100%)',
-    ar: { w: 3, h: 2 },
-  },
-];
-
 /* ── Constants ── */
 const THUMB_R   = 58;
 const EXP_MAX_W = 380;
@@ -96,9 +42,7 @@ class Bubble {
     this.collOffX = 0;
     this.collOffY = 0;
 
-    this.hovered     = false;
-    this.locked      = false;
-    this.expandReady = false;
+    this.hovered = false;
 
     this._build();
   }
@@ -120,12 +64,8 @@ class Bubble {
     label.className = 'bubble-label';
     label.textContent = this.data.label;
 
-    const dot = document.createElement('div');
-    dot.className = 'bubble-lock-dot';
-
     bub.appendChild(fill);
     bub.appendChild(label);
-    bub.appendChild(dot);
     anchor.appendChild(bub);
 
     this.anchorEl = anchor;
@@ -133,12 +73,7 @@ class Bubble {
 
     bub.addEventListener('mouseenter', () => this._onEnter());
     bub.addEventListener('mouseleave', () => this._onLeave());
-    bub.addEventListener('click',      () => this._onClick());
-    bub.addEventListener('transitionend', e => {
-      if (e.propertyName === 'width' && this.hovered && !this.locked) {
-        this.expandReady = true;
-      }
-    });
+    bub.addEventListener('click', () => this._onClick());
 
     document.getElementById('canvas').appendChild(anchor);
   }
@@ -153,9 +88,7 @@ class Bubble {
   }
 
   _onLeave() {
-    if (this.locked) return;
     this.hovered = false;
-    this.expandReady = false;
     if (activeBubble === this) activeBubble = null;
     this.anchorEl.classList.remove('active');
     this.bubbleEl.classList.remove('expanded');
@@ -164,37 +97,12 @@ class Bubble {
   }
 
   _onClick() {
-    if (this.locked) {
-      this.locked = false;
-      this.expandReady = false;
-      this.hovered = false;
-      activeBubble = null;
-      this.anchorEl.classList.remove('active', 'locked');
-      this.bubbleEl.classList.remove('expanded', 'locked');
-      this.bubbleEl.style.width  = THUMB_R * 2 + 'px';
-      this.bubbleEl.style.height = THUMB_R * 2 + 'px';
-    } else if (this.expandReady) {
-      this.locked = true;
-      activeBubble = this;
-      this.anchorEl.classList.add('active', 'locked');
-      this.bubbleEl.classList.add('locked');
+    if (this.data.id && window.openFocusedView) {
+      window.openFocusedView(this.data.id);
     }
   }
 
-  unlock() {
-    if (!this.locked) return;
-    this.locked = false;
-    this.expandReady = false;
-    this.hovered = false;
-    this.anchorEl.classList.remove('active', 'locked');
-    this.bubbleEl.classList.remove('expanded', 'locked');
-    this.bubbleEl.style.width  = THUMB_R * 2 + 'px';
-    this.bubbleEl.style.height = THUMB_R * 2 + 'px';
-    if (activeBubble === this) activeBubble = null;
-  }
-
   updateDrift(t) {
-    if (this.locked) return;
     this.cx = this.baseCx + Math.sin(t * this.speedX + this.phaseX) * this.ampX;
     this.cy = this.baseCy + Math.sin(t * this.speedY + this.phaseY) * this.ampY;
   }
@@ -207,7 +115,7 @@ class Bubble {
 }
 
 /* ── Build all bubbles ── */
-const bubbles = PIECES.map(p => new Bubble(p));
+const bubbles = window.PIECES.map(p => new Bubble(p));
 
 /* ── Hex grid placement (centered in viewport) ── */
 const HEX_H_SPACING = 170;
@@ -243,10 +151,8 @@ function tick(t) {
 
   bubbles.forEach(b => {
     if (b === ab) {
-      if (!b.locked) {
-        b.cx = b.baseCx + Math.sin(t * b.speedX + b.phaseX) * b.ampX;
-        b.cy = b.baseCy + Math.sin(t * b.speedY + b.phaseY) * b.ampY;
-      }
+      b.cx = b.baseCx + Math.sin(t * b.speedX + b.phaseX) * b.ampX;
+      b.cy = b.baseCy + Math.sin(t * b.speedY + b.phaseY) * b.ampY;
       b.pushX += (0 - b.pushX) * 0.1;
       b.pushY += (0 - b.pushY) * 0.1;
     } else {
@@ -283,10 +189,10 @@ function tick(t) {
   for (let iter = 0; iter < 5; iter++) {
     for (let i = 0; i < bubbles.length; i++) {
       const a = bubbles[i];
-      if (a.hovered || a.locked) continue;
+      if (a.hovered) continue;
       for (let j = i + 1; j < bubbles.length; j++) {
         const b = bubbles[j];
-        if (b.hovered || b.locked) continue;
+        if (b.hovered) continue;
         const ax = a.cx + a.pushX + a.collOffX;
         const ay = a.cy + a.pushY + a.collOffY;
         const bx = b.cx + b.pushX + b.collOffX;
@@ -321,11 +227,6 @@ function tick(t) {
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
-
-/* ── Escape to unlock ── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') bubbles.forEach(b => b.unlock());
-});
 
 /* ── Resize handling ── */
 window.addEventListener('resize', () => {

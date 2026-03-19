@@ -1,0 +1,153 @@
+/* ── Focused view overlay ── */
+#focused-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#focused-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#focused-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Panel (liquid glass, side-by-side) ── */
+#focused-panel {
+  position: relative;
+  display: flex;
+  max-width: 900px;
+  max-height: 80vh;
+  width: 90vw;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.5);
+  border-left-color: rgba(255, 255, 255, 0.4);
+  border-radius: 22px;
+  box-shadow:
+    0 16px 64px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+#focused-overlay.open #focused-panel {
+  transform: scale(1);
+}
+
+/* ── Image side ── */
+#focused-image {
+  flex: 0 0 58%;
+  min-height: 320px;
+  position: relative;
+  overflow: hidden;
+}
+
+#focused-fill {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Grain overlay on focused image */
+#focused-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 200px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ── Meta side ── */
+#focused-meta {
+  flex: 1;
+  padding: 36px 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--text);
+}
+
+#focused-title {
+  font-size: 1.3rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.focused-field-label {
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.focused-field-value {
+  font-size: 0.92rem;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.6;
+  opacity: 0.65;
+}
+
+.focused-field-value.empty {
+  opacity: 0.25;
+}
+
+#focused-close {
+  margin-top: auto;
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid rgba(44, 40, 36, 0.12);
+  border-radius: 4px;
+  padding: 8px 24px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.3s ease, border-color 0.3s ease;
+}
+#focused-close:hover {
+  opacity: 0.85;
+  border-color: rgba(44, 40, 36, 0.25);
+}
+
+/* ── Responsive: stack vertically on narrow screens ── */
+@media (max-width: 700px) {
+  #focused-panel {
+    flex-direction: column;
+    max-height: 90vh;
+  }
+  #focused-image {
+    flex: 0 0 auto;
+    min-height: 200px;
+    max-height: 40vh;
+  }
+}
