@@ -10,4 +10,18 @@
       a.classList.add('active');
     }
   });
+
+  /* ── Position footer below chrome panel ── */
+  const panel = document.getElementById('chrome-panel');
+  const footer = document.getElementById('footer');
+  if (panel && footer) {
+    function updateFooterPos() {
+      const rect = panel.getBoundingClientRect();
+      footer.style.top = (rect.bottom + 10) + 'px';
+    }
+    updateFooterPos();
+    window.addEventListener('resize', updateFooterPos);
+    const observer = new MutationObserver(updateFooterPos);
+    observer.observe(panel, { childList: true, subtree: true, attributes: true });
+  }
 })();
