@@ -32,10 +32,10 @@ class Bubble {
 
     this.phaseX    = Math.random() * Math.PI * 2;
     this.phaseY    = Math.random() * Math.PI * 2;
-    this.speedX    = 0.00025 + Math.random() * 0.00025;
+    this.speedX    = 0.00035 + Math.random() * 0.00035;
     this.speedY    = this.speedX * (0.6 + Math.random() * 0.5);
-    this.ampX      = 4 + Math.random() * 6;
-    this.ampY      = 3 + Math.random() * 5;
+    this.ampX      = 10 + Math.random() * 14;
+    this.ampY      = 8 + Math.random() * 10;
 
     this.pushX = 0;
     this.pushY = 0;
