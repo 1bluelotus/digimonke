@@ -74,8 +74,9 @@ body {
 
 /* ── Chrome panel (liquid glass) ── */
 #chrome-panel {
-  position: absolute;
+  position: fixed;
   top: 24px; left: 24px;
+  z-index: 100;
   width: 148px;
   padding: 24px 24px 20px;
   background: rgba(255, 255, 255, 0.12);
