@@ -64,6 +64,7 @@ html, body {
   position: fixed;
   inset: 0;
   overflow: hidden;
+  z-index: 1;
 }
 
 /* ── Bubble anchor (handles positioning + push) ── */
@@ -176,7 +177,7 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 100;
+  z-index: 0;
 }
 
 #site-name {
@@ -233,7 +234,7 @@ html, body {
   transition: opacity 0.6s ease;
   white-space: nowrap;
 }
-#hint.hidden { opacity: 0; }
+
 </style>
 </head>
 <body>
@@ -327,7 +328,6 @@ const SPREAD_MARGIN = 26; // minimum gap between collapsed bubbles
 
 /* ── State ── */
 let activeBubble = null;
-let hintHidden   = false;
 
 /* ── Bubble class ── */
 class Bubble {
@@ -420,10 +420,6 @@ class Bubble {
   }
 
   _onEnter() {
-    if (!hintHidden) {
-      document.getElementById('hint').classList.add('hidden');
-      hintHidden = true;
-    }
     this.hovered = true;
     activeBubble = this;
     this.anchorEl.classList.add('active');
