@@ -91,7 +91,7 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   pointer-events: auto;
-  color: var(--glass-text);
+  color: var(--text);
 }
 
 #avatar {
@@ -113,9 +113,8 @@ body {
   text-transform: uppercase;
   opacity: 0.85;
   text-decoration: none;
-  color: var(--glass-text);
+  color: var(--text);
   transition: opacity 0.3s ease;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 a#site-name:hover {
   opacity: 1;
@@ -128,7 +127,6 @@ a#site-name:hover {
   opacity: 0.45;
   margin-top: 3px;
   margin-bottom: 19px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* ── Nav ── */
@@ -142,12 +140,11 @@ a#site-name:hover {
   font-weight: 300;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--glass-text);
+  color: var(--text);
   text-decoration: none;
   opacity: 0.55;
   transition: opacity 0.3s ease;
   padding: 2px 0;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 #nav a:hover {
   opacity: 1;
@@ -156,27 +153,57 @@ a#site-name:hover {
   opacity: 1;
 }
 
-/* ── Socials flyout ── */
-#socials-flyout {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  padding: 8px 0 2px 12px;
+/* ── Socials dropdown ── */
+#socials-wrap {
+  position: relative;
 }
-#socials-flyout.open { display: flex; }
+#socials-toggle {
+  font-size: 0.86rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+  padding: 2px 0;
+}
+#socials-wrap:hover #socials-toggle {
+  opacity: 1;
+}
+#socials-flyout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 2px 12px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+#socials-wrap:hover #socials-flyout {
+  max-height: 120px;
+  opacity: 1;
+}
 #socials-flyout a {
   font-size: 0.78rem;
   font-weight: 300;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--glass-text);
+  color: var(--text);
   text-decoration: none;
   opacity: 0.45;
   transition: opacity 0.3s ease;
   pointer-events: auto;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 #socials-flyout a:hover { opacity: 1; }
+#socials-flyout svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
 
 /* ── Hint bar ── */
 #hint {
