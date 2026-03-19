@@ -1,301 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Micaela — Portfolio</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg: #080808;
-  --text: #e8e0d4;
-  --text-dim: rgba(232, 224, 212, 0.3);
-  --lock-border: #f0d090;
-  --lock-glow: rgba(240, 208, 144, 0.45);
-}
-
-html, body {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  background: var(--bg);
-  font-family: 'Cormorant Garamond', serif;
-  color: var(--text);
-}
-
-/* ── Mobile placeholder ── */
-#mobile-placeholder {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  text-align: center;
-  padding: 2rem;
-}
-#mobile-placeholder .mark {
-  font-size: 2rem;
-  opacity: 0.4;
-  letter-spacing: 0.4em;
-}
-#mobile-placeholder h2 {
-  font-weight: 300;
-  font-size: 1.5rem;
-  letter-spacing: 0.15em;
-}
-#mobile-placeholder p {
-  font-style: italic;
-  opacity: 0.45;
-  font-size: 1rem;
-  letter-spacing: 0.08em;
-}
-
-@media (max-width: 768px) {
-  #mobile-placeholder { display: flex; }
-  #canvas, #ui { display: none; }
-}
-
-/* ── Canvas ── */
-#canvas {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* ── Bubble anchor (handles positioning + push) ── */
-.bubble-anchor {
-  position: absolute;
-  left: 0; top: 0;
-  width: 0; height: 0;
-  will-change: transform;
-  z-index: 1;
-}
-.bubble-anchor.active  { z-index: 10; }
-.bubble-anchor.locked  { z-index: 20; }
-
-/* ── Bubble visual (handles sizing + border-radius) ── */
-.bubble {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  overflow: hidden;
-  cursor: pointer;
-  pointer-events: auto;
-  border-radius: 50%;
-  box-shadow: 0 6px 28px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06);
-
-  transition:
-    width  0.55s cubic-bezier(0.34, 1.4, 0.64, 1),
-    height 0.55s cubic-bezier(0.34, 1.4, 0.64, 1),
-    border-radius 0.45s ease,
-    box-shadow 0.4s ease;
-  will-change: width, height, border-radius;
-}
-
-.bubble.expanded {
-  border-radius: 10px;
-  box-shadow: 0 16px 60px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(255,255,255,0.08);
-}
-
-.bubble.locked {
-  border-radius: 10px;
-  box-shadow:
-    0 0 0 2.5px var(--lock-border),
-    0 0 40px var(--lock-glow),
-    0 16px 60px rgba(0,0,0,0.8),
-    inset 0 0 0 1px rgba(255,255,255,0.1);
-}
-
-/* ── Bubble inner (gradient fill) ── */
-.bubble-fill {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  pointer-events: none;
-  transition: transform 0.6s ease;
-}
-.bubble:hover .bubble-fill {
-  transform: scale(1.03);
-}
-
-/* ── Grain overlay ── */
-.bubble-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-  background-size: 200px;
-  opacity: 0.6;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
-
-/* ── Label ── */
-.bubble-label {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 20px 18px 14px;
-  background: linear-gradient(transparent, rgba(4,4,4,0.82));
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--text);
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  pointer-events: none;
-  font-weight: 300;
-}
-.bubble.expanded .bubble-label,
-.bubble.locked   .bubble-label {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── Lock indicator ── */
-.bubble-lock-dot {
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--lock-border);
-  box-shadow: 0 0 8px var(--lock-glow);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-.bubble.locked .bubble-lock-dot {
-  opacity: 1;
-}
-
-/* ── UI Chrome ── */
-#ui {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-#site-name {
-  position: absolute;
-  top: 30px; left: 36px;
-  font-size: 1.05rem;
-  font-weight: 300;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  opacity: 0.55;
-}
-
-#site-tagline {
-  position: absolute;
-  top: 55px; left: 37px;
-  font-size: 0.75rem;
-  font-style: italic;
-  letter-spacing: 0.12em;
-  opacity: 0.28;
-}
-
-/* ── Nav ── */
-#nav {
-  position: absolute;
-  top: 90px; left: 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  pointer-events: auto;
-}
-#nav a {
-  font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--text);
-  text-decoration: none;
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-  padding: 2px 0;
-}
-#nav a:hover {
-  opacity: 0.85;
-}
-
-/* ── Socials flyout ── */
-#socials-flyout {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  padding: 8px 0 2px 12px;
-}
-#socials-flyout.open { display: flex; }
-#socials-flyout a {
-  font-size: 0.65rem;
-  font-weight: 300;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text);
-  text-decoration: none;
-  opacity: 0.35;
-  transition: opacity 0.3s ease;
-  pointer-events: auto;
-}
-#socials-flyout a:hover { opacity: 0.85; }
-
-#hint {
-  position: absolute;
-  bottom: 28px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.68rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  transition: opacity 0.6s ease;
-  white-space: nowrap;
-}
-
-</style>
-</head>
-<body>
-
-<!-- Mobile placeholder -->
-<div id="mobile-placeholder">
-  <div class="mark">✦ ✦ ✦</div>
-  <h2>Micaela</h2>
-  <p>Mobile experience coming soon.<br>Please visit on a larger screen.</p>
-</div>
-
-<!-- Desktop canvas -->
-<div id="canvas"></div>
-
-<!-- UI chrome -->
-<div id="ui">
-  <div id="site-name">Micaela</div>
-  <div id="site-tagline">Digital Works</div>
-  <nav id="nav">
-    <a href="#about">About</a>
-    <a href="#archive">Archive</a>
-    <a href="https://artistree.io/digitalmonkey" target="_blank" rel="noopener">Commission</a>
-    <a href="#contact">Contact</a>
-    <a href="#" id="socials-toggle">Socials</a>
-    <div id="socials-flyout">
-      <a href="https://www.youtube.com/@DigitalMonkey_" target="_blank" rel="noopener">Youtube</a>
-      <a href="https://www.tumblr.com/digitalmonkeyy" target="_blank" rel="noopener">Tumblr</a>
-      <a href="https://cara.app/antzzzdraws" target="_blank" rel="noopener">Cara</a>
-    </div>
-  </nav>
-  <div id="hint">Hover to explore &nbsp;·&nbsp; Click to lock &nbsp;·&nbsp; Esc to release</div>
-</div>
-
-<script>
 'use strict';
 
 /* ── Piece data ── */
-const PIECES = [
+const PIECES = window.GALLERY_PIECES || [
   {
     label: 'Reverie I',
     gradient: 'radial-gradient(ellipse at 30% 40%, #c45c3a 0%, #7a1c10 55%, #1a0808 100%)',
@@ -349,10 +55,10 @@ const PIECES = [
 ];
 
 /* ── Constants ── */
-const THUMB_R   = 58;   // collapsed radius (px)
-const EXP_MAX_W = 380;  // max expanded width
-const EXP_MAX_H = 420;  // max expanded height
-const SPREAD_MARGIN = 26; // minimum gap between collapsed bubbles
+const THUMB_R   = 58;
+const EXP_MAX_W = 380;
+const EXP_MAX_H = 420;
+const SPREAD_MARGIN = 26;
 
 /* ── State ── */
 let activeBubble = null;
@@ -362,7 +68,6 @@ class Bubble {
   constructor(data) {
     this.data = data;
 
-    // Calculate expanded dimensions preserving aspect ratio
     const { w, h } = data.ar;
     if (w / h >= 1) {
       this.expW = Math.min(EXP_MAX_W, window.innerWidth * 0.38);
@@ -371,17 +76,14 @@ class Bubble {
       this.expH = Math.min(EXP_MAX_H, window.innerHeight * 0.50);
       this.expW = this.expH * (w / h);
     }
-    // Clamp to viewport
     this.expW = Math.min(this.expW, window.innerWidth * 0.7);
     this.expH = Math.min(this.expH, window.innerHeight * 0.7);
 
-    // Starting position (center)
     this.cx = THUMB_R + 40 + Math.random() * (window.innerWidth  - (THUMB_R + 40) * 2);
     this.cy = THUMB_R + 70 + Math.random() * (window.innerHeight - (THUMB_R + 70) * 2);
     this.baseCx = this.cx;
     this.baseCy = this.cy;
 
-    // Drift params
     this.phaseX    = Math.random() * Math.PI * 2;
     this.phaseY    = Math.random() * Math.PI * 2;
     this.speedX    = 0.00025 + Math.random() * 0.00025;
@@ -389,14 +91,11 @@ class Bubble {
     this.ampX      = 4 + Math.random() * 6;
     this.ampY      = 3 + Math.random() * 5;
 
-    // Push offset (spring — for expanded-bubble repulsion)
     this.pushX = 0;
     this.pushY = 0;
-    // Collision offset (hard constraint — recomputed each frame)
     this.collOffX = 0;
     this.collOffY = 0;
 
-    // State flags
     this.hovered     = false;
     this.locked      = false;
     this.expandReady = false;
@@ -405,11 +104,9 @@ class Bubble {
   }
 
   _build() {
-    // Anchor: positioned at (cx, cy) via transform
     const anchor = document.createElement('div');
     anchor.className = 'bubble-anchor';
 
-    // Visual bubble
     const bub = document.createElement('div');
     bub.className = 'bubble';
     bub.style.width  = THUMB_R * 2 + 'px';
@@ -434,7 +131,6 @@ class Bubble {
     this.anchorEl = anchor;
     this.bubbleEl = bub;
 
-    // Events
     bub.addEventListener('mouseenter', () => this._onEnter());
     bub.addEventListener('mouseleave', () => this._onLeave());
     bub.addEventListener('click',      () => this._onClick());
@@ -469,7 +165,6 @@ class Bubble {
 
   _onClick() {
     if (this.locked) {
-      // Unlock
       this.locked = false;
       this.expandReady = false;
       this.hovered = false;
@@ -479,7 +174,6 @@ class Bubble {
       this.bubbleEl.style.width  = THUMB_R * 2 + 'px';
       this.bubbleEl.style.height = THUMB_R * 2 + 'px';
     } else if (this.expandReady) {
-      // Lock — only when fully expanded
       this.locked = true;
       activeBubble = this;
       this.anchorEl.classList.add('active', 'locked');
@@ -499,14 +193,12 @@ class Bubble {
     if (activeBubble === this) activeBubble = null;
   }
 
-  /* Update drift position */
   updateDrift(t) {
-    if (this.locked) return; // locked bubbles stay put
+    if (this.locked) return;
     this.cx = this.baseCx + Math.sin(t * this.speedX + this.phaseX) * this.ampX;
     this.cy = this.baseCy + Math.sin(t * this.speedY + this.phaseY) * this.ampY;
   }
 
-  /* Commit position to DOM */
   render() {
     const x = this.cx + this.pushX + this.collOffX;
     const y = this.cy + this.pushY + this.collOffY;
@@ -560,7 +252,6 @@ function tick(t) {
     } else {
       b.updateDrift(t);
       if (ab) {
-        // AABB repulsion from the expanded active bubble
         const margin = 30;
         const halfW = ab.expW / 2 + THUMB_R + margin;
         const halfH = ab.expH / 2 + THUMB_R + margin;
@@ -586,8 +277,6 @@ function tick(t) {
     }
   });
 
-  // Hard constraint: collapsed-to-collapsed separation (position-based)
-  // Reset collision offsets — recomputed from scratch each frame
   bubbles.forEach(b => { b.collOffX = 0; b.collOffY = 0; });
 
   const colMin = THUMB_R * 2 + SPREAD_MARGIN;
@@ -618,7 +307,6 @@ function tick(t) {
     }
   }
 
-  // Enforce viewport boundaries on final rendered position
   const vw = window.innerWidth, vh = window.innerHeight;
   bubbles.forEach(b => {
     let x = b.cx + b.pushX + b.collOffX;
@@ -643,12 +331,3 @@ document.addEventListener('keydown', e => {
 window.addEventListener('resize', () => {
   layoutHexGrid();
 });
-
-/* ── Socials toggle ── */
-document.getElementById('socials-toggle').addEventListener('click', e => {
-  e.preventDefault();
-  document.getElementById('socials-flyout').classList.toggle('open');
-});
-</script>
-</body>
-</html>
