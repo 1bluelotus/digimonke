@@ -181,7 +181,7 @@ a#site-name:hover {
 /* ── Hint bar ── */
 #hint {
   position: absolute;
-  bottom: 28px; left: 50%;
+  bottom: 52px; left: 50%;
   transform: translateX(-50%);
   font-size: 0.68rem;
   letter-spacing: 0.25em;
@@ -190,4 +190,27 @@ a#site-name:hover {
   text-shadow: 0 1px 4px rgba(0,0,0,0.2);
   transition: opacity 0.6s ease;
   white-space: nowrap;
+}
+
+/* ── Footer ── */
+#footer {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  white-space: nowrap;
+  z-index: 100;
+}
+#footer a {
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+#footer a:hover {
+  color: rgba(255, 255, 255, 1);
 }

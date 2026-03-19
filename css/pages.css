@@ -29,13 +29,13 @@
 
 /* ── About page ── */
 .about-photo {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
+  display: block;
+  width: 180px;
+  height: auto;
+  border-radius: 18px;
   margin: 0 auto 2.5rem;
-  background: radial-gradient(ellipse at 40% 35%, #c8b8a8 0%, #6a5a4a 50%, #1a1410 100%);
   box-shadow: 0 4px 16px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.15);
-  overflow: hidden;
+  object-fit: cover;
 }
 
 .about-name {
