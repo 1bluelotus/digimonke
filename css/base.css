@@ -14,7 +14,7 @@
 html, body {
   width: 100%; height: 100%;
   overflow: hidden;
-  background: var(--bg) url('../assets/bg.png') center / cover no-repeat fixed;
+  background: var(--bg) url('../assets/bg_night.png') center / cover no-repeat fixed;
   font-family: 'Bricolage Grotesque', sans-serif;
   color: var(--text);
 }
@@ -268,10 +268,10 @@ a#site-name:hover {
 }
 
 /* ── Day/Night icon swap ── */
-#theme-toggle-icon .sun { display: block; }
-#theme-toggle-icon .moon { display: none; }
-.night #theme-toggle-icon .sun { display: none; }
-.night #theme-toggle-icon .moon { display: block; }
+#theme-toggle-icon .moon { display: block; }
+#theme-toggle-icon .sun { display: none; }
+.day #theme-toggle-icon .moon { display: none; }
+.day #theme-toggle-icon .sun { display: block; }
 
 /* ── Toggle track (shared) ── */
 .toggle-track {
@@ -294,18 +294,18 @@ a#site-name:hover {
   transition: left 0.3s ease, opacity 0.3s ease;
 }
 
-/* ── Night mode active state ── */
-.night #theme-toggle .toggle-track {
+/* ── Day mode active state ── */
+.day #theme-toggle .toggle-track {
   background: rgba(44, 40, 36, 0.25);
 }
-.night #theme-toggle .toggle-thumb {
+.day #theme-toggle .toggle-thumb {
   left: 18px;
   opacity: 0.7;
 }
 
-/* ── Night mode background ── */
-html.night, html.night body {
-  background-image: url('../assets/bg_night.png');
+/* ── Day mode background ── */
+html.day, html.day body {
+  background-image: url('../assets/bg.png');
 }
 
 /* ── Cat toggle active state ── */

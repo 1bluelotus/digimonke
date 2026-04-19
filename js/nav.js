@@ -15,8 +15,8 @@
   const themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
-      const isNight = document.documentElement.classList.toggle('night');
-      localStorage.setItem('theme', isNight ? 'night' : 'day');
+      const isDay = document.documentElement.classList.toggle('day');
+      localStorage.setItem('theme', isDay ? 'day' : 'night');
     });
   }
 
