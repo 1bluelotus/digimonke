@@ -1,10 +1,10 @@
 'use strict';
 
 /* ── Constants ── */
-const THUMB_R   = 58;
-const EXP_MAX_W = 380;
-const EXP_MAX_H = 420;
-const SPREAD_MARGIN = 26;
+const THUMB_R   = 78;
+const EXP_MAX_W = 420;
+const EXP_MAX_H = 460;
+const SPREAD_MARGIN = 30;
 
 /* ── State ── */
 let activeBubble = null;
@@ -126,8 +126,8 @@ class Bubble {
 const bubbles = window.PIECES.map(p => new Bubble(p));
 
 /* ── Hex grid placement (centered in viewport) ── */
-const HEX_H_SPACING = 170;
-const HEX_V_SPACING = 148;
+const HEX_H_SPACING = 220;
+const HEX_V_SPACING = 195;
 const HEX_ROWS = [3, 4, 3];
 
 function layoutHexGrid() {
