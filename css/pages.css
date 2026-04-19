@@ -12,19 +12,19 @@
 .page-inner {
   max-width: 560px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
   -webkit-backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-top-color: rgba(255, 255, 255, 0.5);
-  border-left-color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.65);
+  border-left-color: rgba(255, 255, 255, 0.55);
   border-radius: 22px;
   box-shadow:
     0 8px 32px rgba(0,0,0,0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   padding: 40px 36px;
-  color: var(--glass-text);
+  color: var(--text);
 }
 
 /* ── About page ── */
