@@ -54,6 +54,11 @@
     if (!piece) return;
 
     fill.style.background = piece.gradient;
+    if (piece.image) {
+      fill.style.backgroundImage = 'url(' + piece.image + ')';
+      fill.style.backgroundSize = 'cover';
+      fill.style.backgroundPosition = 'center';
+    }
     title.textContent = piece.label;
     setField(dateEl, formatDate(piece.date), 'TBD');
     setField(mediumEl, piece.medium, 'TBD');

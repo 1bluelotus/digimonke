@@ -54,6 +54,11 @@
       const fill = document.createElement('div');
       fill.className = 'archive-card-fill';
       fill.style.background = p.gradient;
+      if (p.image) {
+        fill.style.backgroundImage = 'url(' + p.image + ')';
+        fill.style.backgroundSize = 'cover';
+        fill.style.backgroundPosition = 'center';
+      }
 
       const label = document.createElement('div');
       label.className = 'archive-card-label';

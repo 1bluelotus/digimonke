@@ -59,6 +59,11 @@ class Bubble {
     const fill = document.createElement('div');
     fill.className = 'bubble-fill';
     fill.style.background = this.data.gradient;
+    if (this.data.image) {
+      fill.style.backgroundImage = 'url(' + this.data.image + ')';
+      fill.style.backgroundSize = 'cover';
+      fill.style.backgroundPosition = 'center';
+    }
 
     const label = document.createElement('div');
     label.className = 'bubble-label';
