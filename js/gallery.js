@@ -123,7 +123,7 @@ class Bubble {
 }
 
 /* ── Build all bubbles ── */
-const bubbles = window.PIECES.map(p => new Bubble(p));
+const bubbles = window.PIECES.filter(p => p.favorite).map(p => new Bubble(p));
 
 /* ── Hex grid placement (centered in viewport) ── */
 const HEX_H_SPACING = 220;
