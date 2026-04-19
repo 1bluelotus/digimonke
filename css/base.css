@@ -75,7 +75,7 @@ body {
 /* ── Chrome panel (liquid glass) ── */
 #chrome-panel {
   position: fixed;
-  top: 24px; left: 24px;
+  top: 72px; left: 24px;
   z-index: 100;
   width: 178px;
   padding: 28px 28px 24px;
@@ -220,6 +220,117 @@ a#site-name:hover {
 #socials-flyout svg {
   flex-shrink: 0;
   opacity: 0.7;
+}
+
+/* ── Toggles row ── */
+#toggles-row {
+  position: fixed;
+  top: 24px; left: 24px;
+  z-index: 100;
+  width: 178px;
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Shared toggle badge ── */
+.toggle-badge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.65);
+  border-left-color: rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.toggle-badge:hover {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Toggle icon ── */
+.toggle-icon {
+  width: 16px; height: 16px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ── Day/Night icon swap ── */
+#theme-toggle-icon .sun { display: block; }
+#theme-toggle-icon .moon { display: none; }
+.night #theme-toggle-icon .sun { display: none; }
+.night #theme-toggle-icon .moon { display: block; }
+
+/* ── Toggle track (shared) ── */
+.toggle-track {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(44, 40, 36, 0.12);
+  border: 1px solid rgba(44, 40, 36, 0.1);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+.toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  opacity: 0.5;
+  transition: left 0.3s ease, opacity 0.3s ease;
+}
+
+/* ── Night mode active state ── */
+.night #theme-toggle .toggle-track {
+  background: rgba(44, 40, 36, 0.25);
+}
+.night #theme-toggle .toggle-thumb {
+  left: 18px;
+  opacity: 0.7;
+}
+
+/* ── Night mode background ── */
+html.night, html.night body {
+  background-image: url('../assets/bg_night.png');
+}
+
+/* ── Cat toggle active state ── */
+.cat-active #cat-toggle .toggle-track {
+  background: rgba(44, 40, 36, 0.25);
+}
+.cat-active #cat-toggle .toggle-thumb {
+  left: 18px;
+  opacity: 0.7;
+}
+
+/* ── Rising cat ── */
+#rising-cat {
+  position: fixed;
+  bottom: -300px;
+  right: 40px;
+  z-index: 90;
+  width: 230px;
+  height: auto;
+  transform: scaleX(-1);
+  transition: bottom 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+  pointer-events: none;
+}
+.cat-active #rising-cat {
+  bottom: -10px;
 }
 
 /* ── Hint bar ── */

@@ -11,6 +11,24 @@
     }
   });
 
+  /* ── Day/Night theme toggle ── */
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const isNight = document.documentElement.classList.toggle('night');
+      localStorage.setItem('theme', isNight ? 'night' : 'day');
+    });
+  }
+
+  /* ── Cat toggle ── */
+  const catToggle = document.getElementById('cat-toggle');
+  if (catToggle) {
+    catToggle.addEventListener('click', () => {
+      const isActive = document.documentElement.classList.toggle('cat-active');
+      localStorage.setItem('cat', isActive ? 'on' : 'off');
+    });
+  }
+
   /* ── Position footer below chrome panel ── */
   const panel = document.getElementById('chrome-panel');
   const footer = document.getElementById('footer');
