@@ -260,8 +260,7 @@ a#site-name:hover {
   font-weight: 300;
   letter-spacing: 0.12em;
   line-height: 1.5;
-  color: var(--text);
-  opacity: 0.65;
+  color: rgba(26, 24, 22, 0.65);
   z-index: 100;
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(24px) saturate(1.4) brightness(1.1);
@@ -275,13 +274,27 @@ a#site-name:hover {
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
+#footer-cat {
+  position: absolute;
+  right: -100px;
+  bottom: -50px;
+  width: 120px;
+  height: auto;
+  transform: scaleX(-1);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+#footer:hover #footer-cat {
+  opacity: 1;
+}
+
 #footer a {
-  color: var(--text);
+  color: rgba(26, 24, 22, 0.8);
   text-decoration: underline;
   text-underline-offset: 2px;
-  opacity: 0.7;
   transition: opacity 0.3s ease;
 }
 #footer a:hover {
-  opacity: 1;
+  color: rgba(26, 24, 22, 1);
 }
