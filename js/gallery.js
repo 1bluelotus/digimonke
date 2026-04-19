@@ -55,6 +55,9 @@ class Bubble {
     bub.className = 'bubble';
     bub.style.width  = THUMB_R * 2 + 'px';
     bub.style.height = THUMB_R * 2 + 'px';
+    if (this.data.ring) {
+      bub.style.setProperty('--ring', this.data.ring);
+    }
 
     const fill = document.createElement('div');
     fill.className = 'bubble-fill';
